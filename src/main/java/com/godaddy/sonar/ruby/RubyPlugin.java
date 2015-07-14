@@ -30,7 +30,7 @@ public final class RubyPlugin extends SonarPlugin
         extensions.add(SimpleCovRcovSensor.class);
         extensions.add(SimpleCovRcovJsonParserImpl.class);
         extensions.add(MetricfuComplexityYamlParserImpl.class);
-        extensions.add(RubySourceImporter.class);
+//        extensions.add(RubySourceImporter.class);
         extensions.add(RubySourceCodeColorizer.class);
         extensions.add(RubySensor.class);
         extensions.add(MetricfuComplexitySensor.class);

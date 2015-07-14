@@ -36,7 +36,7 @@ public class RubyPackage extends Resource
         return getKey();
     }
 
-    public Resource<?> getParent()
+    public Resource getParent()
     {
         return null;
     }

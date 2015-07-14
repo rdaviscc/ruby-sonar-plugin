@@ -15,13 +15,16 @@ import org.easymock.IMocksControl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.SensorContext;
+import org.sonar.api.config.Settings;
 import org.sonar.api.measures.Measure;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.resources.Project;
 import org.sonar.api.scan.filesystem.FileQuery;
 import org.sonar.api.scan.filesystem.ModuleFileSystem;
 
+import com.godaddy.sonar.ruby.core.LanguageRuby;
 import com.godaddy.sonar.ruby.core.RubyFile;
 import com.godaddy.sonar.ruby.core.RubyPackage;
 
@@ -42,11 +45,15 @@ public class RubySensorTest {
 		mocksControl = EasyMock.createControl();
 		moduleFileSystem = mocksControl.createMock(ModuleFileSystem.class);
 
-		config = mocksControl.createMock(Configuration.class);
-		expect(config.getString("sonar.language", "java")).andStubReturn("ruby");
+//		config = mocksControl.createMock(Configuration.class);
+//		expect(config.getString("sonar.language", "java")).andStubReturn("ruby");
 
 		project = new Project("test project");
-		project.setConfiguration(config);
+        Settings settings = new Settings();
+        settings.setProperty(CoreProperties.PROJECT_LANGUAGE_PROPERTY, LanguageRuby.KEY);
+        project.setSettings(settings);
+		project.setLanguage(LanguageRuby.INSTANCE);
+//		project.setConfiguration(config);
 
 		sensorContext = mocksControl.createMock(SensorContext.class);
 

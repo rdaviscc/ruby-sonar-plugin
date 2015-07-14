@@ -13,7 +13,7 @@ import org.sonar.api.utils.WildcardPattern;
 import java.io.File;
 import java.util.List;
 
-public class RubyFile extends Resource<RubyPackage>
+public class RubyFile extends Resource
 {
     private String filename;
     private String longName;
