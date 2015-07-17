@@ -48,44 +48,59 @@ public class MetricfuComplexitySensor implements Sensor
         {
             LOG.debug("analyzing functions for classes in the file: " + file.getName());
             try
-            {
+            {            	
                 analyzeFile(file, sourceDirs, context, resultsFile);
             } catch (IOException e)
             {
-                LOG.error("Can not analyze the file " + file.getAbsolutePath() + " for complexity");
+                LOG.error("Can not analyze the file " + file.getAbsolutePath() + " for complexity", e);                
             }
         }
     }
 
     private void analyzeFile(File file, List<File> sourceDirs, SensorContext sensorContext, File resultsFile) throws IOException
-    {
+    {		
+    	
         RubyFile resource = new RubyFile(file, sourceDirs);
+        LOG.info("functions are set");
         List<RubyFunction> functions = metricfuComplexityYamlParser.parseFunctions(resource.getName(), resultsFile);
 
         // if function list is empty, then return, do not compute any complexity
         // on that file
-        if (functions.isEmpty())
+        if (functions.isEmpty() || functions.size() == 0 || functions == null)
         {
             return;
         }
+        
+        
 
         // COMPLEXITY
+        LOG.info("COMPLEXITY are set" + functions.toString());
         int fileComplexity = 0;
         for (RubyFunction function : functions)
         {
+        	
             fileComplexity += function.getComplexity();
+            LOG.info("Complexity " + fileComplexity);
         }
+        
+        LOG.info("Saving Measure ");
         sensorContext.saveMeasure(resource, CoreMetrics.COMPLEXITY, Double.valueOf(fileComplexity));
 
         // FILE_COMPLEXITY_DISTRIBUTION
+        LOG.info("FILE_COMPLEXITY_DISTRIBUTION are set");
+
         RangeDistributionBuilder fileDistribution = new RangeDistributionBuilder(CoreMetrics.FILE_COMPLEXITY_DISTRIBUTION, FILES_DISTRIB_BOTTOM_LIMITS);
         fileDistribution.add(Double.valueOf(fileComplexity));
         sensorContext.saveMeasure(resource, fileDistribution.build().setPersistenceMode(PersistenceMode.MEMORY));
 
         // FUNCTION_COMPLEXITY
+        LOG.info("FUNCTION_COMPLEXITY are set");
+
         sensorContext.saveMeasure(resource, CoreMetrics.FUNCTION_COMPLEXITY, Double.valueOf(fileComplexity) / functions.size());
 
         // FUNCTION_COMPLEXITY_DISTRIBUTION
+        LOG.info("FUNCTION_COMPLEXITY_DISTRIBUTION are set");
+
         RangeDistributionBuilder functionDistribution = new RangeDistributionBuilder(CoreMetrics.FUNCTION_COMPLEXITY_DISTRIBUTION, FUNCTIONS_DISTRIB_BOTTOM_LIMITS);
         for (RubyFunction function : functions)
         {

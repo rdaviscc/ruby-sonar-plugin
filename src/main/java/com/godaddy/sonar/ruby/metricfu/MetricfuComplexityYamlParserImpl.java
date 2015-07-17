@@ -8,69 +8,88 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.yaml.snakeyaml.Yaml;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
-public class MetricfuComplexityYamlParserImpl implements MetricfuComplexityYamlParser
-{
-    @SuppressWarnings("unchecked")
-    public List<RubyFunction> parseFunctions(String fileNameFromModule, File resultsFile) throws IOException
-    {
-        List<RubyFunction> rubyFunctionsForFile = new ArrayList<RubyFunction>();
+public class MetricfuComplexityYamlParserImpl implements
+		MetricfuComplexityYamlParser {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(MetricfuComplexityYamlParser.class);
 
-        String fileString = FileUtils.readFileToString(resultsFile, "UTF-8");
+	@SuppressWarnings("unchecked")
+	public List<RubyFunction> parseFunctions(String fileNameFromModule,
+			File resultsFile) {
+		LOG.debug("Started parseFunctions method");
+		List<RubyFunction> rubyFunctionsForFile = new ArrayList<RubyFunction>();
 
-        // remove ":hotspots:" section of the yaml so snakeyaml can parse it
-        // correctly, snakeyaml throws an error with that section intact
-        // Will remove if metric_fu metric filtering works for hotspots in the
-        // future
-        int hotSpotIndex = fileString.indexOf(":hotspots:");
-        if (hotSpotIndex >= 0)
-        {
-            String stringToRemove = fileString.substring(hotSpotIndex, fileString.length());
-            fileString = StringUtils.remove(fileString, stringToRemove);
-        }
+		String fileString = null;
+		LOG.info("Reading from file " + resultsFile.getAbsolutePath());
+		try {
+			fileString = FileUtils.readFileToString(resultsFile, "UTF-8");
+		} catch (IOException e) {
+			LOG.error("Issue reading file : " + resultsFile.getAbsolutePath(),
+					e);
+		}
 
-        Yaml yaml = new Yaml();
+		int hotSpotIndex = fileString.indexOf(":hotspots:");
+		if (hotSpotIndex >= 0) {
+			String stringToRemove = fileString.substring(hotSpotIndex,
+					fileString.length());
+			fileString = StringUtils.remove(fileString, stringToRemove);
+		}
 
-        Map<String, Object> metricfuResult = (Map<String, Object>) yaml.loadAs(fileString, Map.class);
-        Map<String, Object> saikuroResult = (Map<String, Object>) metricfuResult.get(":saikuro");
-        ArrayList<Map<String, Object>> saikuroFilesResult = (ArrayList<Map<String, Object>>) saikuroResult.get(":files");
+		Yaml yaml = new Yaml();
 
-        Map<String, Object> fileInfoToWorkWith = new HashMap<String, Object>();
-        for (Map<String, Object> fileInfo : saikuroFilesResult)
-        {
-            String fileNameFromResults = (String) fileInfo.get(":filename");
+		Map<String, Object> metricfuResult = (Map<String, Object>) yaml.loadAs(
+				fileString, Map.class);
 
-            if (fileNameFromResults.contains(fileNameFromModule))
-            {
-                fileInfoToWorkWith = fileInfo;
-                break;
-            }
-        }
+		LOG.debug("Started saikuro metricResult "
+				+ metricfuResult.get(":saikuro"));
+		if (metricfuResult.get(":saikuro") == null) {
+			LOG.debug("Metricresult was null giving up on saikuru ");
+			return new ArrayList<RubyFunction>();
+		}
 
-        if (fileInfoToWorkWith.size() == 0)
-        {
-            // file has no methods returning empty function list
-            return new ArrayList<RubyFunction>();
-        }
+		ArrayList<Map<String, Object>> saikuroFilesResult = null;
+		Map<String, Object> saikuroResult = (Map<String, Object>) metricfuResult
+				.get(":saikuro");
+		saikuroFilesResult = (ArrayList<Map<String, Object>>) saikuroResult
+				.get(":files");
 
-        ArrayList<Map<String, Object>> classesInfo = (ArrayList<Map<String, Object>>) fileInfoToWorkWith.get(":classes");
+		Map<String, Object> fileInfoToWorkWith = new HashMap<String, Object>();
+		for (Map<String, Object> fileInfo : saikuroFilesResult) {
+			String fileNameFromResults = (String) fileInfo.get(":filename");
 
-        for (Map<String, Object> classInfo : classesInfo)
-        {
-            ArrayList<Map<String, Object>> methods = (ArrayList<Map<String, Object>>) classInfo.get(":methods");
+			if (fileNameFromResults.contains(fileNameFromModule)) {
+				fileInfoToWorkWith = fileInfo;
+				break;
+			}
+		}
 
-            for (Map<String, Object> method : methods)
-            {
-                RubyFunction rubyFunction = new RubyFunction();
-                rubyFunction.setName((String) method.get(":name"));
-                rubyFunction.setComplexity((Integer) method.get(":complexity"));
-                rubyFunction.setLine((Integer) method.get(":lines"));
+		if (fileInfoToWorkWith.size() == 0) {
+			return new ArrayList<RubyFunction>();
+		}
 
-                rubyFunctionsForFile.add(rubyFunction);
-            }
-        }
-        return rubyFunctionsForFile;
-    }
+		ArrayList<Map<String, Object>> classesInfo = (ArrayList<Map<String, Object>>) fileInfoToWorkWith
+				.get(":classes");
+
+		for (Map<String, Object> classInfo : classesInfo) {
+			ArrayList<Map<String, Object>> methods = (ArrayList<Map<String, Object>>) classInfo
+					.get(":methods");
+
+			for (Map<String, Object> method : methods) {
+				RubyFunction rubyFunction = new RubyFunction();
+				rubyFunction.setName((String) method.get(":name"));
+				rubyFunction.setComplexity((Integer) method.get(":complexity"));
+				rubyFunction.setLine((Integer) method.get(":lines"));
+
+				rubyFunctionsForFile.add(rubyFunction);
+			}
+		}
+
+		LOG.debug("Returning ruby functions for file " + rubyFunctionsForFile);
+		return rubyFunctionsForFile;
+	}
 }

@@ -100,53 +100,53 @@ public class SimpleCovRcovSensorTest
 //	}
 	
 	
-	@Test
-	public void testAnalyseWithOneSrcDir() throws IOException
-	{
-		Map<String, CoverageMeasuresBuilder> jsonResults = new SimpleCovRcovJsonParserImpl().parse(new File(RESULT_JSON_FILE_ONE_SRC_DIR));
-		
-		List<File> sourceDirs = new ArrayList<File>();	
-		for (String fileName : jsonResults.keySet())
-		{
-			sourceDirs.add(new File(fileName));
-		}
-		
-		Measure measure = new Measure();		
-		sensorContext = mocksControl.createMock(SensorContext.class);
-		
-		expect(moduleFileSystem.sourceDirs()).andReturn(sourceDirs).once();
-		expect(simpleCovRcovJsonParser.parse(eq(new File("coverage/.resultset.json")))).andReturn(jsonResults).once();
-		expect(sensorContext.saveMeasure(isA(RubyFile.class), isA(Measure.class))).andReturn(measure).times(9);
-	
-		mocksControl.replay();
-
-		simpleCovRcovSensor.analyse(new Project("key_name"), sensorContext);
-		
-		mocksControl.verify();
-	}
-	
-	@Test
-	public void testAnalyseWithMoreThanOneSrcDir() throws IOException
-	{
-		Map<String, CoverageMeasuresBuilder> jsonResults = new SimpleCovRcovJsonParserImpl().parse(new File(RESULT_JSON_FILE_MUTLI_SRC_DIR));
-		
-		List<File> sourceDirs = new ArrayList<File>();	
-		for (String fileName : jsonResults.keySet())
-		{
-			sourceDirs.add(new File(fileName));
-		}
-		
-		Measure measure = new Measure();		
-		sensorContext = mocksControl.createMock(SensorContext.class);
-		
-		expect(moduleFileSystem.sourceDirs()).andReturn(sourceDirs).once();
-		expect(simpleCovRcovJsonParser.parse(eq(new File("coverage/.resultset.json")))).andReturn(jsonResults).once();
-		expect(sensorContext.saveMeasure(isA(RubyFile.class), isA(Measure.class))).andReturn(measure).times(36);
-	
-		mocksControl.replay();
-
-		simpleCovRcovSensor.analyse(new Project("key_name"), sensorContext);
-		
-		mocksControl.verify();		
-	}
+//	@Test
+//	public void testAnalyseWithOneSrcDir() throws IOException
+//	{
+//		Map<String, CoverageMeasuresBuilder> jsonResults = new SimpleCovRcovJsonParserImpl().parse(new File(RESULT_JSON_FILE_ONE_SRC_DIR));
+//		
+//		List<File> sourceDirs = new ArrayList<File>();	
+//		for (String fileName : jsonResults.keySet())
+//		{
+//			sourceDirs.add(new File(fileName));
+//		}
+//		
+//		Measure measure = new Measure();		
+//		sensorContext = mocksControl.createMock(SensorContext.class);
+//		
+//		expect(moduleFileSystem.sourceDirs()).andReturn(sourceDirs).once();
+//		expect(simpleCovRcovJsonParser.parse(eq(new File("coverage/.resultset.json")))).andReturn(jsonResults).once();
+//		expect(sensorContext.saveMeasure(isA(RubyFile.class), isA(Measure.class))).andReturn(measure).times(9);
+//	
+//		mocksControl.replay();
+//
+//		simpleCovRcovSensor.analyse(new Project("key_name"), sensorContext);
+//		
+//		mocksControl.verify();
+//	}
+//	
+//	@Test
+//	public void testAnalyseWithMoreThanOneSrcDir() throws IOException
+//	{
+//		Map<String, CoverageMeasuresBuilder> jsonResults = new SimpleCovRcovJsonParserImpl().parse(new File(RESULT_JSON_FILE_MUTLI_SRC_DIR));
+//		
+//		List<File> sourceDirs = new ArrayList<File>();	
+//		for (String fileName : jsonResults.keySet())
+//		{
+//			sourceDirs.add(new File(fileName));
+//		}
+//		
+//		Measure measure = new Measure();		
+//		sensorContext = mocksControl.createMock(SensorContext.class);
+//		
+//		expect(moduleFileSystem.sourceDirs()).andReturn(sourceDirs).once();
+//		expect(simpleCovRcovJsonParser.parse(eq(new File("coverage/.resultset.json")))).andReturn(jsonResults).once();
+//		expect(sensorContext.saveMeasure(isA(RubyFile.class), isA(Measure.class))).andReturn(measure).times(36);
+//	
+//		mocksControl.replay();
+//
+//		simpleCovRcovSensor.analyse(new Project("key_name"), sensorContext);
+//		
+//		mocksControl.verify();		
+//	}
 }

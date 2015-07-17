@@ -8,12 +8,17 @@ import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.measures.CoverageMeasuresBuilder;
 
+import com.godaddy.sonar.ruby.simplecovrcov.SimpleCovRcovJsonParser;
 import com.google.common.collect.Maps;
 
 public class SimpleCovRcovJsonParserImpl implements SimpleCovRcovJsonParser
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleCovRcovJsonParserImpl.class);
+
     public Map<String, CoverageMeasuresBuilder> parse(File file) throws IOException
     {
         Map<String, CoverageMeasuresBuilder> coveredFiles = Maps.newHashMap();
@@ -31,6 +36,8 @@ public class SimpleCovRcovJsonParserImpl implements SimpleCovRcovJsonParser
             CoverageMeasuresBuilder fileCoverage = CoverageMeasuresBuilder.create();
 
             String filePath = coverageJsonObj.keySet().toArray()[j].toString();
+        	LOG.debug("filePath " + filePath);
+
             JSONArray coverageArray = (JSONArray) coverageJsonObj.get(coverageJsonObj.keySet().toArray()[j]);
 
             // for each line in the coverage array
@@ -45,6 +52,7 @@ public class SimpleCovRcovJsonParserImpl implements SimpleCovRcovJsonParser
                     fileCoverage.setHits(lineNumber, intLine);
                 }
             }
+            LOG.info("FILE COVERAGE = " + fileCoverage.getCoveredLines());
             coveredFiles.put(filePath, fileCoverage);
         }
         return coveredFiles;
